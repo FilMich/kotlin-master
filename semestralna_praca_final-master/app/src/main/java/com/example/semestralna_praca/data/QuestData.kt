@@ -4,7 +4,6 @@ import com.example.semestralna_praca.model.Quest
 
 object QuestData {
     val allQuests = listOf(
-
         // 💪 Strength
         Quest(1, "strength", "Zacvič si {x} minút", 15, 10, 5, 12, "daily"),
         Quest(2, "strength", "Urob {x} drepov", 30, 10, 10, 10, "daily"),
@@ -40,4 +39,6 @@ object QuestData {
         Quest(24, "discipline", "Pracuj sústredene {x} minút", 25, 10, 5, 10, "daily"),
         Quest(25, "discipline", "Vyhni sa rušeniu počas {x} minút", 20, 10, 5, 9, "daily"),
     )
+
+    val allCategories: List<String> = allQuests.map { it.category }.distinct()
 }

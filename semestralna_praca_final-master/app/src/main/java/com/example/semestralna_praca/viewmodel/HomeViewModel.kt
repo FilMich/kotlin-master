@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.semestralna_praca.model.LevelData
 import com.example.semestralna_praca.model.QuestEntity
-import com.example.semestralna_praca.model.Quest
 import com.example.semestralna_praca.model.QuestDisplay
 import com.example.semestralna_praca.data.QuestData.QuestData
 import com.example.semestralna_praca.utils.QuestUtils
@@ -65,7 +64,8 @@ class HomeViewModel : ViewModel() {
             "title" to scaledQuest.description,
             "done" to false,
             "xpReward" to scaledQuest.xp,
-            "frequency" to scaledQuest.frequency
+            "frequency" to scaledQuest.frequency,
+            "createdAt" to com.google.firebase.Timestamp.now()
         )
 
         db.collection("users").document(uid)
@@ -99,7 +99,7 @@ class HomeViewModel : ViewModel() {
                             title = data["title"] as? String ?: "",
                             done = data["done"] as? Boolean ?: false,
                             xpReward = (data["xpReward"] as? Long ?: 10L).toInt(),
-                            frequency = data["frequency"] as? String ?: "daily" // default fallback
+                            frequency = data["frequency"] as? String ?: "daily"
                         )
                     }
                     _activeQuests.value = quests
@@ -157,7 +157,7 @@ class HomeViewModel : ViewModel() {
                             title = data["title"] as? String ?: "",
                             done = data["done"] as? Boolean ?: false,
                             xpReward = (data["xpReward"] as? Long ?: 10L).toInt(),
-                            frequency = data["frequency"] as? String ?: "daily" // default fallback
+                            frequency = data["frequency"] as? String ?: "daily"
                         )
                     }
                     _completedQuests.value = quests
@@ -213,4 +213,39 @@ class HomeViewModel : ViewModel() {
 
     val userLevel: Int
         get() = calculateOverallLevel()
+
+    // 💣 Reset všetkého
+    fun resetEverything(onComplete: () -> Unit) {
+        val uid = Firebase.auth.currentUser?.uid ?: return
+        val db = Firebase.firestore
+        val userRef = db.collection("users").document(uid)
+
+        // 1. Reset štatistík
+        val defaultStats = QuestData.allCategories.associateWith {
+            mapOf("level" to 1, "xp" to 0)
+        }
+
+        userRef.update("stats", defaultStats).addOnSuccessListener {
+            // 2. Vymazanie všetkých questov (aktívne aj dokončené)
+            userRef.collection("quests").get().addOnSuccessListener { snapshot ->
+                val batch = db.batch()
+                for (doc in snapshot.documents) {
+                    batch.delete(doc.reference)
+                }
+                batch.commit().addOnSuccessListener {
+                    // 3. Vyčistenie lokálnych stavov
+                    _stats.value = emptyMap()
+                    _activeQuests.value = emptyList()
+                    _completedQuests.value = emptyList()
+
+                    // 4. Znova načítame aktuálne údaje
+                    loadUserStats()
+                    loadActiveQuests()
+                    loadCompletedQuests()
+
+                    onComplete()
+                }
+            }
+        }
+    }
 }

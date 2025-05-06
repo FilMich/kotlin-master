@@ -14,7 +14,6 @@ import androidx.navigation.NavHostController
 import com.example.semestralna_praca.utils.AvatarHelper
 import com.example.semestralna_praca.viewmodel.HomeViewModel
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
 @Composable
@@ -32,16 +31,6 @@ fun ProfileScreen(
 
     if (stats.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        return
-    }
-
-    if (stats.isEmpty()) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
             CircularProgressIndicator()
         }
         return
@@ -123,13 +112,12 @@ fun ProfileScreen(
             AlertDialog(
                 onDismissRequest = { showConfirmReset = false },
                 title = { Text("Reset štatistík") },
-                text = { Text("Naozaj chceš resetovať svoje štatistiky?") },
+                text = { Text("Naozaj chceš resetovať všetko – štatistiky, aktívne questy aj históriu?") },
                 confirmButton = {
                     TextButton(onClick = {
-                        resetStats {
+                        viewModel.resetEverything {
                             showConfirmReset = false
                             showSettings = false
-                            viewModel.loadUserStats()
                         }
                     }) {
                         Text("Reset")
@@ -176,27 +164,14 @@ fun ProfileScreen(
     }
 }
 
-// 🔄 Reset štatistík
-fun resetStats(onSuccess: () -> Unit) {
-    val uid = Firebase.auth.currentUser?.uid ?: return
-    val db = Firebase.firestore
-    val defaultStats = mapOf(
-        "strength" to mapOf("level" to 1, "xp" to 0),
-        "intelligence" to mapOf("level" to 1, "xp" to 0),
-        "agility" to mapOf("level" to 1, "xp" to 0),
-        "creativity" to mapOf("level" to 1, "xp" to 0),
-        "discipline" to mapOf("level" to 1, "xp" to 0)
-    )
-
-    db.collection("users").document(uid)
-        .update("stats", defaultStats)
-        .addOnSuccessListener { onSuccess() }
-}
-
 // ❌ Zmazanie účtu
 fun deleteAccount(onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
     val user = Firebase.auth.currentUser
     user?.delete()?.addOnCompleteListener { task ->
-        if (task.isSuccessful) onSuccess() else onFailure(task.exception ?: Exception("Neznáma chyba"))
+        if (task.isSuccessful) {
+            onSuccess()
+        } else {
+            onFailure(task.exception ?: Exception("Neznáma chyba"))
+        }
     }
 }

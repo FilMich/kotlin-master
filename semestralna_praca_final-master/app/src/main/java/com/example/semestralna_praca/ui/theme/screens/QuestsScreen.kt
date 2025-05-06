@@ -123,7 +123,10 @@ fun QuestsScreen(viewModel: HomeViewModel = viewModel()) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clickable { selectedQuest = quest }
+                                    .clickable {
+                                        selectedQuest = quest
+                                        showQuestList = false
+                                    }
                                     .padding(vertical = 6.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
@@ -147,7 +150,7 @@ fun QuestsScreen(viewModel: HomeViewModel = viewModel()) {
         )
     }
 
-    // Detail konkrétneho questu
+    // Detail konkrétneho questu s možnosťou splnenia
     selectedQuest?.let { quest ->
         AlertDialog(
             onDismissRequest = { selectedQuest = null },
@@ -163,8 +166,19 @@ fun QuestsScreen(viewModel: HomeViewModel = viewModel()) {
                 }
             },
             confirmButton = {
-                TextButton(onClick = { selectedQuest = null }) {
-                    Text("Späť")
+                Column {
+                    TextButton(
+                        onClick = {
+                            viewModel.completeQuest(quest) {
+                                selectedQuest = null
+                            }
+                        }
+                    ) {
+                        Text("✅ Označiť ako splnené")
+                    }
+                    TextButton(onClick = { selectedQuest = null }) {
+                        Text("Späť")
+                    }
                 }
             }
         )

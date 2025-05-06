@@ -12,7 +12,10 @@ object QuestUtils {
             else -> 1
         }
 
-        val steps = level / quest.scalingStep
+        // 👉 Ak ide o weekly alebo monthly quest, vynútim aspoň 1 krok škálovania
+        val baseSteps = level / quest.scalingStep
+        val steps = if (frequency != "daily") baseSteps.coerceAtLeast(1) else baseSteps
+
         val finalValue = quest.baseValue + (steps * quest.increment) * scalingMultiplier
         val finalXP = quest.baseXP * scalingMultiplier
 
