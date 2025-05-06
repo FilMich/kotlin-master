@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "982082232742",
+    "project_id": "semestralnapraca-4075e",
+    "storage_bucket": "semestralnapraca-4075e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:982082232742:android:9df5fc31b936020322af67",
+        "android_client_info": {
+          "package_name": "com.example.semestralna_praca"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAp1bZlWe_8Qg3fogndYiQpiT_4lFintJg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
